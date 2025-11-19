@@ -451,6 +451,7 @@ impl AnthropicAdapter {
 										"tool_use_id": tool_response.call_id,
 									}));
 								}
+								ContentPart::ThoughtSignature(_) => {}
 							}
 						}
 						let values = apply_cache_control_to_parts(is_cache_control, values);
@@ -483,6 +484,7 @@ impl AnthropicAdapter {
 							// Unsupported for assistant role in Anthropic message content
 							ContentPart::Binary(_) => {}
 							ContentPart::ToolResponse(_) => {}
+							ContentPart::ThoughtSignature(_) => {}
 						}
 					}
 
