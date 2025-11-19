@@ -20,14 +20,18 @@ pub struct InterStreamEnd {
 
 	// When `ChatOptions..capture_tool_calls == true`
 	pub captured_tool_calls: Option<Vec<crate::chat::ToolCall>>,
+
+	// When `ChatOptions..capture_thought_signatures == true` (implied or explicit)
+	pub captured_thought_signatures: Option<Vec<String>>,
 }
 
 /// Intermediary StreamEvent
 #[derive(Debug)]
 pub enum InterStreamEvent {
-	Start,
-	Chunk(String),
-	ReasoningChunk(String),
-	ToolCallChunk(crate::chat::ToolCall),
-	End(InterStreamEnd),
+    Start,
+    Chunk(String),
+    ReasoningChunk(String),
+    ThoughtSignatureChunk(String),
+    ToolCallChunk(crate::chat::ToolCall),
+    End(InterStreamEnd),
 }

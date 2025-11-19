@@ -1,5 +1,5 @@
 use crate::adapter::inter_stream::{InterStreamEnd, InterStreamEvent};
-use crate::chat::{MessageContent, ToolCall, Usage};
+use crate::chat::{ContentPart, MessageContent, ToolCall, Usage};
 use futures::Stream;
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
@@ -42,6 +42,7 @@ impl Stream for ChatStream {
 					InterStreamEvent::ReasoningChunk(content) => {
 						ChatStreamEvent::ReasoningChunk(StreamChunk { content })
 					}
+                    InterStreamEvent::ThoughtSignatureChunk(content) => ChatStreamEvent::ThoughtSignatureChunk(StreamChunk { content }),
 					InterStreamEvent::ToolCallChunk(tool_call) => {
 						ChatStreamEvent::ToolCallChunk(ToolChunk { tool_call })
 					}
@@ -71,6 +72,9 @@ pub enum ChatStreamEvent {
 
 	/// Reasoning content chunk.
 	ReasoningChunk(StreamChunk),
+
+    /// Thought signature content chunk.
+    ThoughtSignatureChunk(StreamChunk),
 
 	/// Tool-call chunk.
 	ToolCallChunk(ToolChunk),
@@ -128,6 +132,17 @@ impl From<InterStreamEnd> for StreamEnd {
 			} else {
 				// This `captured_tool_calls` is the concatenation of all tool call chunks received.
 				captured_content = Some(MessageContent::from_tool_calls(captured_tool_calls));
+			}
+		}
+		if let Some(captured_thoughts) = inter_end.captured_thought_signatures {
+			let thoughts_content = captured_thoughts
+				.into_iter()
+				.map(ContentPart::ThoughtSignature)
+				.collect::<Vec<_>>();
+			if let Some(existing_content) = &mut captured_content {
+				existing_content.extend(thoughts_content);
+			} else {
+				captured_content = Some(MessageContent::from_parts(thoughts_content));
 			}
 		}
 
