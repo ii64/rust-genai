@@ -208,15 +208,40 @@ impl Adapter for GeminiAdapter {
 			usage,
 		} = gemini_response;
 
-		// FIXME: Needs to take the content list
-		let mut content: MessageContent = MessageContent::default();
+		let mut thoughts: Vec<String> = Vec::new();
+		let mut texts: Vec<String> = Vec::new();
+		let mut tool_calls: Vec<ToolCall> = Vec::new();
+
 		for g_item in gemini_content {
 			match g_item {
-				GeminiChatContent::Text(text) => content.push(text),
-				GeminiChatContent::ToolCall(tool_call) => content.push(tool_call),
-				GeminiChatContent::ThoughtSignature(thought) => content.push(ContentPart::ThoughtSignature(thought)),
+				GeminiChatContent::Text(text) => texts.push(text),
+				GeminiChatContent::ToolCall(tool_call) => tool_calls.push(tool_call),
+				GeminiChatContent::ThoughtSignature(thought) => thoughts.push(thought),
 			}
 		}
+
+		let thought_signatures_for_call = (!thoughts.is_empty() && !tool_calls.is_empty()).then(|| thoughts.clone());
+		let mut parts: Vec<ContentPart> = thoughts.into_iter().map(ContentPart::ThoughtSignature).collect();
+
+		if let Some(signatures) = thought_signatures_for_call {
+			if let Some(first_call) = tool_calls.first_mut() {
+				first_call.thought_signatures = Some(signatures);
+			}
+		}
+
+		if !texts.is_empty() {
+			let total_len: usize = texts.iter().map(|t| t.len()).sum();
+			let mut combined_text = String::with_capacity(total_len);
+			for text in texts {
+				combined_text.push_str(&text);
+			}
+			if !combined_text.is_empty() {
+				parts.push(ContentPart::Text(combined_text));
+			}
+		}
+
+		parts.extend(tool_calls.into_iter().map(ContentPart::ToolCall));
+		let content = MessageContent::from_parts(parts);
 
 		Ok(ChatResponse {
 			content,
