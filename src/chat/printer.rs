@@ -68,6 +68,7 @@ async fn print_chat_stream_inner(
 
 	let mut first_chunk = true;
 	let mut first_reasoning_chunk = true;
+    let mut first_thought_signature_chunk = true;
 	let mut first_tool_chunk = true;
 
 	while let Some(next) = stream.next().await {
@@ -108,6 +109,19 @@ async fn print_chat_stream_inner(
 							(None, Some(content), false) // print but do not capture
 						}
 					}
+
+                ChatStreamEvent::ThoughtSignatureChunk(StreamChunk { content }) => {
+                    if print_events && first_thought_signature_chunk {
+                        first_thought_signature_chunk = false;
+                        (
+                            Some("\n-- ChatStreamEvent::ThoughtSignatureChunk (concatenated):\n".to_string()),
+                            Some(content),
+                            false, // print but do not capture
+                        )
+                    } else {
+                        (None, Some(content), false) // print but do not capture
+                    }
+                }
 
 					ChatStreamEvent::ToolCallChunk(tool_chunk) => {
 						if print_events && first_tool_chunk {

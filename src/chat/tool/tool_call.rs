@@ -11,7 +11,17 @@ pub struct ToolCall {
 	/// Name of the function to invoke.
 	pub fn_name: String,
 
-	/// JSON arguments payload as provided by the model.
-	/// Kept as `serde_json::Value` so callers can deserialize into their own types.
-	pub fn_arguments: Value,
+    /// JSON arguments payload as provided by the model.
+    /// Kept as `serde_json::Value` so callers can deserialize into their own types.
+    pub fn_arguments: Value,
+
+    /// Optional thought signatures that should precede tool calls in the assistant turn.
+    ///
+    /// When present on the first tool call in a batch, `ChatMessage::from(Vec<ToolCall>)`
+    /// will automatically include these as leading `ThoughtSignature` parts in the
+    /// assistant message content. This enables simple continuations like:
+    /// `append_message(tool_calls).append_message(tool_response)` without having to
+    /// manually inject thoughts.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thought_signatures: Option<Vec<String>>, 
 }

@@ -3,11 +3,13 @@ use genai::Client;
 use genai::chat::printer::{PrintChatStreamOptions, print_chat_stream};
 use genai::chat::{ChatMessage, ChatOptions, ChatRequest, Tool, ToolResponse};
 use genai::chat::{ChatStreamEvent, ToolCall};
+use genai::resolver::AuthData;
 use serde_json::json;
 use tracing_subscriber::EnvFilter;
 
 // const MODEL: &str = "gemini-2.0-flash";
-const MODEL: &str = "deepseek-chat";
+// const MODEL: &str = "deepseek-chat";
+const MODEL: &str = "gemini-3-pro-preview";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -17,6 +19,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.init();
 
 	let client = Client::default();
+
+	println!("--- Model: {MODEL}");
 
 	// 1. Define a tool for getting weather information
 	let weather_tool = Tool::new("get_weather")
@@ -63,14 +67,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			ChatStreamEvent::Chunk(chunk) => {
 				print!("{}", chunk.content);
 			}
-			ChatStreamEvent::ToolCallChunk(tool_chunk) => {
-				println!(
-					"\nTool Call: {} with args: {}",
-					tool_chunk.tool_call.fn_name, tool_chunk.tool_call.fn_arguments
-				);
+			ChatStreamEvent::ToolCallChunk(chunk) => {
+				println!("  ToolCallChunk: {:?}", chunk.tool_call);
 			}
 			ChatStreamEvent::ReasoningChunk(chunk) => {
-				println!("\nReasoning: {}", chunk.content);
+				println!("  ReasoningChunk: {:?}", chunk.content);
+			}
+			ChatStreamEvent::ThoughtSignatureChunk(chunk) => {
+				println!("  ThoughtSignatureChunk: {:?}", chunk.content);
 			}
 			ChatStreamEvent::End(end) => {
 				println!("\nStream ended");

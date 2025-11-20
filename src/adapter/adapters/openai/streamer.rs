@@ -65,11 +65,12 @@ impl futures::Stream for OpenAIStreamer {
 								.into_iter()
 								.map(|tool_call| {
 									// extrat
-									let ToolCall {
-										call_id,
-										fn_name,
-										fn_arguments,
-									} = tool_call;
+                                let ToolCall {
+                                    call_id,
+                                    fn_name,
+                                    fn_arguments,
+                                    ..
+                                } = tool_call;
 									// parse fn_arguments if needed
 									let fn_arguments = match fn_arguments {
 										Value::String(fn_arguments_string) => {
@@ -82,11 +83,12 @@ impl futures::Stream for OpenAIStreamer {
 										_ => fn_arguments,
 									};
 
-									ToolCall {
-										call_id,
-										fn_name,
-										fn_arguments,
-									}
+                                ToolCall {
+                                    call_id,
+                                    fn_name,
+                                    fn_arguments,
+                                    thought_signatures: None,
+                                }
 								})
 								.collect();
 							Some(tools_calls)
@@ -100,6 +102,7 @@ impl futures::Stream for OpenAIStreamer {
 							captured_text_content: self.captured_data.content.take(),
 							captured_reasoning_content: self.captured_data.reasoning_content.take(),
 							captured_tool_calls,
+							captured_thought_signatures: None,
 						};
 
 						return Poll::Ready(Some(Ok(InterStreamEvent::End(inter_stream_end))));
@@ -173,11 +176,12 @@ impl futures::Stream for OpenAIStreamer {
 									let fn_name = function.x_take::<String>("name").unwrap_or_default();
 									let arguments = function.x_take::<String>("arguments").unwrap_or_default();
 									// Don't parse yet - accumulate as string first
-									let mut tool_call = crate::chat::ToolCall {
-										call_id,
-										fn_name,
-										fn_arguments: serde_json::Value::String(arguments.clone()),
-									};
+                                    let mut tool_call = crate::chat::ToolCall {
+                                        call_id,
+                                        fn_name,
+                                        fn_arguments: serde_json::Value::String(arguments.clone()),
+                                        thought_signatures: None,
+                                    };
 
 									// Capture the tool call if enabled
 									if self.options.capture_tool_calls {

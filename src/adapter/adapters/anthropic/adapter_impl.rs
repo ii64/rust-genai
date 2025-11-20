@@ -248,11 +248,12 @@ impl Adapter for AnthropicAdapter {
 					let fn_name = item.x_take::<String>("name")?;
 					// if not found, will be Value::Null
 					let fn_arguments = item.x_take::<Value>("input").unwrap_or_default();
-					let tool_call = ToolCall {
-						call_id,
-						fn_name,
-						fn_arguments,
-					};
+                    let tool_call = ToolCall {
+                        call_id,
+                        fn_name,
+                        fn_arguments,
+                        thought_signatures: None,
+                    };
 
 					let part = ContentPart::ToolCall(tool_call);
 					content.push(part);
@@ -451,6 +452,7 @@ impl AnthropicAdapter {
 										"tool_use_id": tool_response.call_id,
 									}));
 								}
+								ContentPart::ThoughtSignature(_) => {}
 							}
 						}
 						let values = apply_cache_control_to_parts(is_cache_control, values);
@@ -483,6 +485,7 @@ impl AnthropicAdapter {
 							// Unsupported for assistant role in Anthropic message content
 							ContentPart::Binary(_) => {}
 							ContentPart::ToolResponse(_) => {}
+							ContentPart::ThoughtSignature(_) => {}
 						}
 					}
 

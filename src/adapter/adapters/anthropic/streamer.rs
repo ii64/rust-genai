@@ -132,11 +132,12 @@ impl futures::Stream for AnthropicStreamer {
 						"content_block_stop" => {
 							match std::mem::replace(&mut self.in_progress_block, InProgressBlock::Text) {
 								InProgressBlock::ToolUse { id, name, input } => {
-									let tc = ToolCall {
-										call_id: id,
-										fn_name: name,
-										fn_arguments: serde_json::from_str(&input)?,
-									};
+                                let tc = ToolCall {
+                                    call_id: id,
+                                    fn_name: name,
+                                    fn_arguments: serde_json::from_str(&input)?,
+                                    thought_signatures: None,
+                                };
 
 									// Add to the captured_tool_calls if chat options say so
 									if self.options.capture_tool_calls {
@@ -182,6 +183,7 @@ impl futures::Stream for AnthropicStreamer {
 								captured_text_content: self.captured_data.content.take(),
 								captured_reasoning_content: self.captured_data.reasoning_content.take(),
 								captured_tool_calls: self.captured_data.tool_calls.take(),
+								captured_thought_signatures: None,
 							};
 
 							// TODO: Need to capture the data as needed

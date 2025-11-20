@@ -35,11 +35,12 @@ impl ContentPart {
 						info: "tool call arguments is not an object.\nCause",
 					})?;
 
-				let tool_call = ToolCall {
-					call_id,
-					fn_name,
-					fn_arguments,
-				};
+                let tool_call = ToolCall {
+                    call_id,
+                    fn_name,
+                    fn_arguments,
+                    thought_signatures: None,
+                };
 
 				parts.push(tool_call.into());
 			}
