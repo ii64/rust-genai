@@ -126,7 +126,7 @@ impl futures::Stream for GeminiStreamer {
 									self.captured_data.usage = Some(usage.clone());
 								}
 
-                            self.pending_events.push_back(InterStreamEvent::ThoughtSignatureChunk(thought));
+								self.pending_events.push_back(InterStreamEvent::ThoughtSignatureChunk(thought));
 							}
 
 							// 2. Text

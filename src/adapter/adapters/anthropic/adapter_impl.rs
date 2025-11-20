@@ -252,6 +252,7 @@ impl Adapter for AnthropicAdapter {
 						call_id,
 						fn_name,
 						fn_arguments,
+						thought_signatures: None,
 					};
 
 					let part = ContentPart::ToolCall(tool_call);

@@ -28,10 +28,10 @@ pub struct InterStreamEnd {
 /// Intermediary StreamEvent
 #[derive(Debug)]
 pub enum InterStreamEvent {
-    Start,
-    Chunk(String),
-    ReasoningChunk(String),
-    ThoughtSignatureChunk(String),
-    ToolCallChunk(crate::chat::ToolCall),
-    End(InterStreamEnd),
+	Start,
+	Chunk(String),
+	ReasoningChunk(String),
+	ThoughtSignatureChunk(String),
+	ToolCallChunk(crate::chat::ToolCall),
+	End(InterStreamEnd),
 }

@@ -323,6 +323,7 @@ impl GeminiAdapter {
 					call_id: fn_call_value.x_get("name").unwrap_or("".to_string()), // TODO: Handle this, gemini does not return the call_id
 					fn_name: fn_call_value.x_get("name").unwrap_or("".to_string()),
 					fn_arguments: fn_call_value.x_get("args").unwrap_or(Value::Null),
+					thought_signatures: None,
 				};
 				content.push(GeminiChatContent::ToolCall(tool_call))
 			}
